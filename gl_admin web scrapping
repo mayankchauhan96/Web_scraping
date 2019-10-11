@@ -1,0 +1,86 @@
+from selenium import webdriver
+import re
+import time
+import datetime
+import pandas as pd
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
+
+kw = "Demelan Cream"
+kw = kw.lower()
+# data = pd.read_csv(r'C:\Users\Shaly\PycharmProjects\untitled\venv\keywords1.csv')  #csv file named as "keyword_relevancy"
+# data['keywords'] = data["keywords"].map(lambda x: x.lower())
+
+# searching for keywords
+# kwd = data['keywords']    #column named as "keywords"
+#
+# #output
+# finaldf = pd.DataFrame(columns=['Searched Keyword', 'First Related MCAT', 'cd_list_count (List of unique Suppliers)', 'Relevant Product Count as per Title'
+#     , 'Relevant Product Count as per Desc (Desc Containing srch kw)', 'Total Listing Visible on DIR', 'Manual Check (Data Recall)'
+# ])
+
+driver = webdriver.Chrome("chromedriver.exe")
+address = "http://gladmin.intermesh.net/index.php?r=DashBoard/display#"
+driver.get(address)
+time.sleep(4)
+email = driver.find_element_by_xpath("//*[@id='contactEmail']")
+email.send_keys("varun.chauhan@indiamart.com")
+time.sleep(1)
+password = driver.find_element_by_xpath("//*[@id='login-form']/div[5]/div/input")
+password.send_keys("varun1234")
+time.sleep(2)
+btn = driver.find_element_by_xpath("//*[@id='contactButton']")
+btn.click()
+time.sleep(5)
+mrkt = driver.find_element_by_xpath("//*[@id='divtabs']/div[19]")
+mrkt.click()
+time.sleep(5)
+scrn= driver.find_element_by_link_text("Product Listing Test Screen")
+scrn.click()
+time.sleep(4)
+
+# def search(kw):
+driver.switch_to.frame(0)
+time.sleep(4)
+driver.switch_to.frame(0)
+time.sleep(4)
+element = driver.find_element_by_xpath("//*[@id='sk']")
+element.send_keys(kw)
+time.sleep(4)
+driver.find_element_by_xpath("//*[@id='generate_report']").click()
+time.sleep(3)
+mcat = driver.find_element_by_xpath("//*[@id='result']/table[2]/tbody/tr").text
+mcat = re.split("(Related\sMcats\s)", mcat)
+mcat = re.sub("(\s\(\d+\)\,\s(Medium|High|Low)\,\s\d+(\s)?)",',', mcat[2])
+mcat = re.split("\,", mcat)
+
+
+count = 0
+for diff in mcat:
+    try:
+        diff = diff.lower()
+
+        if kw.find(' ') != -1:
+            kw = kw.split()
+            new_value = ""
+            for value in kw:
+                new_value = new_value + value
+            kw = new_value
+
+        if diff.find(' ') != -1:
+            diff = diff.split()
+            new_value = ""
+            for value in diff:
+                new_value = new_value + value
+            diff = new_value
+
+        if diff.find(kw) != -1:
+            count = count + 1
+
+    except:
+        pass
+
+print(count)
+
+# for i in kwd:
+#     search(i)
