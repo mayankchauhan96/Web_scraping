@@ -1,18 +1,22 @@
 from googlesearch import search
 import pandas as pd
 
-file = pd.read_csv("file.csv")
-kw = file['keyword']
+file =pd.read_csv(r'C:\Users\Shaly\PycharmProjects\untitled\venv\keywords1.csv')
+kw = file['keywords']
 
-finaldf = pd.DataFrame(columns=('Keyword', 'links'))
+finaldf = pd.DataFrame(columns=('Keywords', 'links'))
 row = 0
 for j in kw:
     term = "site:dir.indiamart.com " + j
-    finaldf.set_value(row, 'Keyword', j)
+    finaldf.set_value(row, 'Keywords', j)
     print(term)
-    for i in search(term, tld="com", num=20, stop=2, pause=60):
-        finaldf.set_value(row, 'links', i)
+    try:
+        for i in search(term, tld="com", num=30, stop=30, pause=60):
+            finaldf.set_value(row, 'links', i)
+            row = row + 1
         row = row + 1
-    row = row + 1
+    except:
+        pass
     finaldf.to_csv("D:/finalOutput2.csv")
+
 
