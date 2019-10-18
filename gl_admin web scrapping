@@ -5,19 +5,23 @@ import datetime
 import pandas as pd
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
+import pyautogui
+from fuzzywuzzy import fuzz
 
-kw = "Demelan Cream"
-kw = kw.lower()
-# data = pd.read_csv(r'C:\Users\Shaly\PycharmProjects\untitled\venv\keywords1.csv')  #csv file named as "keyword_relevancy"
-# data['keywords'] = data["keywords"].map(lambda x: x.lower())
-
+pyautogui.FAILSAFE = False
+# kw = "Demelan Cream"
+# kw = kw.lower()
+data = pd.read_csv(r'C:\Users\Shaly\PycharmProjects\untitled\venv\keywords1.csv')  #csv file named as "keyword_relevancy"
+data['keywords'] = data["keywords"].map(lambda x: x.lower())
+#
 # searching for keywords
-# kwd = data['keywords']    #column named as "keywords"
+kw = data['keywords']    #column named as "keywords"
 #
 # #output
 # finaldf = pd.DataFrame(columns=['Searched Keyword', 'First Related MCAT', 'cd_list_count (List of unique Suppliers)', 'Relevant Product Count as per Title'
 #     , 'Relevant Product Count as per Desc (Desc Containing srch kw)', 'Total Listing Visible on DIR', 'Manual Check (Data Recall)'
 # ])
+finaldf = pd.DataFrame(columns=['Searched Keyword', 'related category', 'No. of MCAt containing kw', '% match with mcat','product count'])
 
 driver = webdriver.Chrome("chromedriver.exe")
 address = "http://gladmin.intermesh.net/index.php?r=DashBoard/display#"
@@ -39,48 +43,94 @@ scrn= driver.find_element_by_link_text("Product Listing Test Screen")
 scrn.click()
 time.sleep(4)
 
-# def search(kw):
-driver.switch_to.frame(0)
-time.sleep(4)
-driver.switch_to.frame(0)
-time.sleep(4)
-element = driver.find_element_by_xpath("//*[@id='sk']")
-element.send_keys(kw)
-time.sleep(4)
-driver.find_element_by_xpath("//*[@id='generate_report']").click()
-time.sleep(3)
-mcat = driver.find_element_by_xpath("//*[@id='result']/table[2]/tbody/tr").text
-mcat = re.split("(Related\sMcats\s)", mcat)
-mcat = re.sub("(\s\(\d+\)\,\s(Medium|High|Low)\,\s\d+(\s)?)",',', mcat[2])
-mcat = re.split("\,", mcat)
 
 
-count = 0
-for diff in mcat:
+def search(kw):
     try:
-        diff = diff.lower()
+        driver.switch_to.frame(0)
+        time.sleep(1)
+    except:
+        pass
 
-        if kw.find(' ') != -1:
-            kw = kw.split()
-            new_value = ""
-            for value in kw:
-                new_value = new_value + value
-            kw = new_value
+    try:
+        driver.switch_to.frame(0)
+        time.sleep(1)
+    except:
+        pass
+    element = driver.find_element_by_xpath("//*[@id='sk']")
+    element.clear()
+    element.send_keys(kw)
+    time.sleep(1)
+    driver.find_element_by_xpath("//*[@id='generate_report']").click()
+    time.sleep(2)
 
-        if diff.find(' ') != -1:
-            diff = diff.split()
-            new_value = ""
-            for value in diff:
-                new_value = new_value + value
-            diff = new_value
+    global mcat
 
-        if diff.find(kw) != -1:
-            count = count + 1
+    global product_count
+
+    try:
+        mcat = driver.find_element_by_xpath("//*[@id='result']/table[2]/tbody/tr").text
+        mcat = re.split("(Related\sMcats\s)", mcat)
+        mcat = re.sub("(\s\(\d+\)\,\s(Medium|High|Low)\,\s\d+(\s)?)", ',', mcat[2])
+        mcat = re.split("\,", mcat)
+        product_count = driver.find_element_by_xpath("//*[@id='result']/table[1]/tbody/tr[1]/td[4]").text
+        # while(i!=14):
+        #     title = driver.find_element_by_xpath("//*[@id='results']/tr[" + (i+1)+ "]/td[71]").text
+        #     print(title)
+    except:
+        pass
+    print(product_count)
+    print(mcat)
+    global diff
+    global count
+    global match_percentage
+    match_percentage = 0
+    count = 0
+    try:
+        for diff in mcat:
+            print(kw)
+            print(diff)
+            match_percentage = fuzz.token_sort_ratio(diff, kw)
+
+            if kw.find(' ') != -1:
+                kw = kw.split()
+                new_value = ""
+                for value in kw:
+                    new_value = new_value + value
+                kw = new_value
+
+            if diff.find(' ') != -1:
+                diff = diff.lower()
+                diff = diff.split()
+                new_value = ""
+                for value in diff:
+                    new_value = new_value + value
+                diff = new_value
+
+            if diff.find(kw) != -1:
+                count = count + 1
 
     except:
         pass
 
-print(count)
+    print(count)
+    print(match_percentage)
+    driver.switch_to.default_content()
 
-# for i in kwd:
-#     search(i)
+row = 0
+for i in kw:
+    search(i)
+    finaldf.set_value(row, 'Searched Keyword', i)
+    finaldf.set_value(row, 'No. of MCAt containing kw', count)
+    # finaldf.set_value(row, '% match with mcat', match_percentage)
+    finaldf.set_value(row, 'product count', product_count)
+    for diff in mcat:
+        finaldf.set_value(row, 'related category', diff)
+        finaldf.set_value(row, '% match with mcat', match_percentage)
+        row = row + 1
+    row = row + 1
+    finaldf.to_csv("D:/finalOutputmcatapp8.csv")
+
+
+driver.close()
+
