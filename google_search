@@ -1,22 +1,28 @@
 from googlesearch import search
 import pandas as pd
 
-file =pd.read_csv(r'C:\Users\Shaly\PycharmProjects\untitled\venv\keywords1.csv')
+file =pd.read_csv('file.csv')
 kw = file['keywords']
 
 finaldf = pd.DataFrame(columns=('Keywords', 'links'))
 row = 0
 for j in kw:
     term = "site:dir.indiamart.com " + j
+
     finaldf.set_value(row, 'Keywords', j)
     print(term)
+
+    timer = pd.np.random.randint(60, 80)
+
     try:
-        for i in search(term, tld="com", num=30, stop=30, pause=60):
+        print("Waiting for ", timer, " seconds.")
+        for i in search(term, tld="com", num=30, stop=30, pause=timer):
+
+            print("Wait over.. searching.. ")
             finaldf.set_value(row, 'links', i)
             row = row + 1
         row = row + 1
     except:
         pass
-    finaldf.to_csv("D:/finalOutput2.csv")
-
+    finaldf.to_csv("D:/finalOutputtwo.csv")
 
