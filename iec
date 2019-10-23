@@ -4,59 +4,64 @@ import time
 import datetime
 import pandas as pd
 
-id1 = 4435464
-letter = "mit"
-# data = pd.read_csv(r'C:\Users\Shaly\PycharmProjects\untitled\venv\keywords.csv')
-# id1 = data['id']
-# letter = data['letter']
-#
-# finaldf = pd.DataFrame(columns=['id', 'letter', 'Field_name'])
+
+data = pd.read_csv(r'C:\Users\Shaly\PycharmProjects\untitled\venv\keywords.csv')
+id1 = data['id']
+letter = data['letter']
+
+finaldf = pd.DataFrame(columns=['id', 'letter', 'Field_name', ':', 'credentials'])
 
 driver = webdriver.Chrome("chromedriver.exe")
 
 def get_all_data(id1, letter):
     address = "http://dgft.delhi.nic.in:8100/dgft/IecPrint"
     driver.get(address)
-    time.sleep(4)
-
-    driver.find_element_by_xpath("/html/body/form/input[1]").send_keys(id1)
-
-    enter_letter = driver.find_element_by_xpath("/html/body/form/input[2]")
-    enter_letter.send_keys(letter)
-
-    result = driver.find_element_by_xpath("/html/body/form/input[3]")
-    result.click()
     time.sleep(2)
-    table = driver.find_element_by_xpath("/html/body/table[1]/tbody")
-    noofrows = len(table.find_elements_by_xpath("//tr"))
+    try:
+        driver.find_element_by_xpath("/html/body/form/input[1]").send_keys(str(id1))
 
-    noofcolumns = len(table.find_elements_by_xpath("//tr[2]/td"))
-    global allData
-    allData = []
+        enter_letter = driver.find_element_by_xpath("/html/body/form/input[2]")
+        enter_letter.send_keys(str(letter))
 
-    for i in range(2, noofrows):
-        ro = []
-        for j in range(1, noofcolumns+1):
-            ro.append(table.find_element_by_xpath("//tr[" + str(i) + "]/td[" + str(j) + "]").text)
-        allData.append(ro)
-    print(allData)
-#
-# row = 0
-#
-# for i in id1:
-#     u = 0
-#     for j in letter:
-#         get_all_data(id1[u], letter[u])
-#         finaldf.set_value(row, 'id', i)
-#         finaldf.set_value(row, 'letter', j)
-#         for q in allData:
-#             finaldf.set_value(row, 'Field_name', q)
-#             row= row + 1
-#         u = u+1
-#     row = row + 1
-#     finaldf.to_csv("D:/finalOutputiec2.csv")
+        result = driver.find_element_by_xpath("/html/body/form/input[3]")
+        result.click()
+        time.sleep(2)
 
-get_all_data(id1,letter)
+        table = driver.find_element_by_xpath("/html/body/table[1]/tbody")
+        noofrows = len(table.find_elements_by_xpath("//tr"))
 
+        noofcolumns = len(table.find_elements_by_xpath("//tr[2]/td"))
+        global allData
+        allData = []
+
+        for i in range(2, noofrows):
+            ro = []
+            for j in range(1, noofcolumns + 1):
+                ro.append(table.find_element_by_xpath("//tr[" + str(i) + "]/td[" + str(j) + "]").text)
+            allData.append(ro)
+        print(allData)
+    except:
+        pass
+
+row = 0
+
+for i in id1:
+    u = 0
+    for j in letter:
+        get_all_data(id1[u], letter[u])
+        finaldf.set_value(row, 'id', i)
+        finaldf.set_value(row, 'letter', j)
+        for q in allData:
+            for p in q:
+                finaldf.set_value(row, 'Field_name', q[0])
+                finaldf.set_value(row, ':', q[1])
+                q[2] = q[2].replace('\n',' ')
+                finaldf.set_value(row, 'credentials', str(q[2]))
+            row = row + 1
+        u = u + 1
+    row = row + 2
+    finaldf.to_csv("D:/finalOutputiec2.csv")
+    break
+driver.quit()
 
 
