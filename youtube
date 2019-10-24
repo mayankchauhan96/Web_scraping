@@ -1,0 +1,16 @@
+text = "J&M Tank Talks by J&M Tank Lines 7 year ago 8 minutes, 28 seconds 322 views"
+text = re.sub("by\s|ago\s", '.', text)
+text = re.split("\.", text)
+name = text[0]
+date = re.split(r"([0-9]([0-9])?\s(months|month|days|day|years|year|hours|hour|minutes|minute|seconds))", text[1])
+publisher_name = date[0]
+date = date[1]
+length1 = re.split(r"([0-9][0-9]?\s(hours|hour|minutes|minute|seconds|second)\,\s[0-9][0-9]?\s(hours|hour|minutes|minute|seconds|second))", text[2])
+length = length1[1]
+views = length1[-1]
+print(text)
+print(name)
+print(publisher_name)
+print(date)
+print(length)
+print(views)
