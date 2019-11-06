@@ -4,64 +4,47 @@ import time
 import datetime
 import pandas as pd
 
-
-data = pd.read_csv(r'C:\Users\Shaly\PycharmProjects\untitled\venv\keywords.csv')
-id1 = data['id']
-letter = data['letter']
-
-finaldf = pd.DataFrame(columns=['id', 'letter', 'Field_name', ':', 'credentials'])
+data = pd.read_csv(r'C:\Users\MAYANK CHAUHAN\PycharmProjects\impexpcode\file.csv')
+gst_no = data["gst no."]
+finaldf = pd.DataFrame(columns=["gst no.", "legal name", "address","Trade Name","status"])
 
 driver = webdriver.Chrome("chromedriver.exe")
+address = "https://gstim4096:welcome2019@www.gstvalidator.com/~gst/~1.php"
+driver.get(address)
 
-def get_all_data(id1, letter):
-    address = "http://dgft.delhi.nic.in:8100/dgft/IecPrint"
-    driver.get(address)
-    time.sleep(2)
-    try:
-        driver.find_element_by_xpath("/html/body/form/input[1]").send_keys(str(id1))
 
-        enter_letter = driver.find_element_by_xpath("/html/body/form/input[2]")
-        enter_letter.send_keys(str(letter))
-
-        result = driver.find_element_by_xpath("/html/body/form/input[3]")
-        result.click()
-        time.sleep(2)
-
-        table = driver.find_element_by_xpath("/html/body/table[1]/tbody")
-        noofrows = len(table.find_elements_by_xpath("//tr"))
-
-        noofcolumns = len(table.find_elements_by_xpath("//tr[2]/td"))
-        global allData
-        allData = []
-
-        for i in range(2, noofrows):
-            ro = []
-            for j in range(1, noofcolumns + 1):
-                ro.append(table.find_element_by_xpath("//tr[" + str(i) + "]/td[" + str(j) + "]").text)
-            allData.append(ro)
-        print(allData)
-    except:
-        pass
+def search(gst_no):
+    gst_enter = driver.find_element_by_xpath("//*[@id='gst_number']")
+    gst_enter.send_keys(gst_no)
+    driver.find_element_by_xpath("//*[@id='gst_form_submit_button']").click()
+    time.sleep(4)
+    table = driver.find_element_by_xpath("//*[@id='contact']/div/div/div")
+    global allData
+    allData = []
+    noofrows = len(table.find_elements_by_xpath("//tr"))
+    print(noofrows)
+    noofcolumns = len(table.find_elements_by_xpath("//tr[2]/td"))
+    print(noofcolumns)
+    for k in range(1, noofrows):
+        ro = []
+        for j in range(1, noofcolumns +1):
+            ro.append(table.find_element_by_xpath("//tr[" + str(k) + "]/td[" + str(j) + "]").text)
+        allData.append(ro)
+    print(allData)
 
 row = 0
-
-for i in id1:
-    u = 0
-    for j in letter:
-        get_all_data(id1[u], letter[u])
-        finaldf.set_value(row, 'id', i)
-        finaldf.set_value(row, 'letter', j)
-        for q in allData:
-            for p in q:
-                finaldf.set_value(row, 'Field_name', q[0])
-                finaldf.set_value(row, ':', q[1])
-                q[2] = q[2].replace('\n',' ')
-                finaldf.set_value(row, 'credentials', str(q[2]))
-            row = row + 1
-        u = u + 1
-    row = row + 2
-    finaldf.to_csv("D:/finalOutputiec2.csv")
-    break
+for i in gst_no:
+    search(i)
+    finaldf.set_value(row, 'gst no.', i)
+    for q in allData:
+        finaldf.set_value(row, 'legal name', allData[0])
+        finaldf.set_value(row, 'Trade Name', allData[4])
+        finaldf.set_value(row, 'address', allData[5])
+        finaldf.set_value(row, 'status', allData[9])
+    row = row + 1
+    finaldf.to_csv("D:/finalOutputgstnew.csv")
 driver.quit()
+
+
 
 
