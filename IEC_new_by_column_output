@@ -1,13 +1,14 @@
 from selenium import webdriver
 import time
 import pandas as pd
+import re
 
 
 data = pd.read_csv(r'keywords.csv')
 id1 = data['id']
 letter = data['letter']
 
-finaldf = pd.DataFrame(columns=['IEC', 'letter', 'Party Name and Address', 'e_mail', 'Exporter Type', 'IEC Status', 'BIN (PAN+Extension)'])
+finaldf = pd.DataFrame(columns=['IEC', 'letter', 'party name', 'address', 'Party Name and Address', 'e_mail', 'Exporter Type', 'IEC Status', 'BIN (PAN+Extension)'])
 
 driver = webdriver.Chrome("chromedriver.exe")
 
@@ -21,12 +22,16 @@ def get_all_data(id1, letter):
     global exporter_type
     global status
     global bin
-    iec = ""
-    pn_add = ""
-    email = ""
-    exporter_type =""
-    status = ""
-    bin = ""
+    global c_name
+    global adrs
+    iec = "Na"
+    pn_add = "Na"
+    email = "Na"
+    exporter_type ="Na"
+    status = "Na"
+    bin = "Na"
+    c_name = "Na"
+    adrs = "Na"
 
     try:
         driver.find_element_by_xpath("/html/body/form/input[1]").send_keys(str(id1))
@@ -45,11 +50,21 @@ def get_all_data(id1, letter):
         exporter_type = driver.find_element_by_xpath("//td[text()=\"Exporter Type\"]/../td[3]").text
         status = driver.find_element_by_xpath("//td[text()=\"IEC Status\"]/../td[3]").text
         bin = driver.find_element_by_xpath("//td[text()=\"BIN (PAN+Extension)\"]/../td[3]").text
-        print(bin)
-
+        list = pn_add.split("\n")
+        c_name = list[0]
+        adrs1 = list[1:]
+        adrs = '\n'.join(map(str, adrs1))
     except:
         pass
-
+    print(iec)
+    print(pn_add)
+    print(email)
+    print(exporter_type)
+    print(status)
+    print(bin)
+    print(c_name)
+    print(adrs)
+    print("")
 row = 0
 
 for i in id1:
@@ -63,9 +78,11 @@ for i in id1:
         finaldf.set_value(row, 'Exporter Type', exporter_type)
         finaldf.set_value(row, 'IEC Status', status)
         finaldf.set_value(row, 'BIN (PAN+Extension)', bin)
+        finaldf.set_value(row, 'party name', c_name)
+        finaldf.set_value(row, 'address', adrs)
         u = u + 1
         row = row + 1
-    finaldf.to_csv("D:/finalOutputiecfinal2.csv")
+        finaldf.to_csv("D:/finalOutputiecfinalsome.csv")
     break
 driver.quit()
 
