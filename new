@@ -1,0 +1,81 @@
+import 'package:flutter/foundation.dart';
+import 'dart:async' show Future;
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:convert';
+import 'package:flutter_json/student_model.dart';
+import 'package:flutter/material.dart'
+
+void main(){
+  runApp(new Myapp(),
+  );
+}
+
+class Myapp extends StatelessWidget{
+  @override 
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Buiz Scan',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: ContactsList(),
+    );
+  }
+
+
+}
+
+class Input{
+   String name;
+   String company;
+   String address;
+   int phone;
+   String email;
+   String website;
+   DateTime date;
+
+  Input({
+    this.name,
+    this.company,
+    this.address,
+    this.phone,
+    this.email,
+    this.website,
+    this.date
+  });
+
+
+  factory Input.fromJsonMap(Map<String, dynamic> parsedJson){
+    
+    return Input(
+      name: parsedJson[0],
+      company: parsedJson[1],
+      address: parsedJson[2],
+      phone: parsedJson[3],
+      email: parsedJson[4],
+      website: parsedJson[5],
+      date: parsedJson[6]
+    
+    );
+  }
+}
+
+class ContactsList extends StatefulWidget {
+  @override
+  ContactsList createState() => ContactsListState();
+}
+
+class ContactListState extends State<ContactsList> {
+  StreamController<contacts> streamController;
+  List<contacts> list = [];
+ 
+@override
+  void initState() {
+    super.initState();
+    streamController = StreamController.broadcast();
+
+    streamController.stream.listen((p) => setState(() => list.add(p)));
+
+    load(streamController);
+
+
